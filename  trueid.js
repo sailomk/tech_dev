@@ -65,9 +65,7 @@ const deviceSignin = async () => {
                // let resHeaderArr = resHeader.map((resHeader) => resHeader.set-cookie)
             }
             
-        }
-
-        )
+        })
 
     } catch (error){
         console.log('catch error : ', error)
