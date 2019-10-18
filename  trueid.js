@@ -1,9 +1,11 @@
 host = 'https://discover.dmpcdn.com/discover/tid_discover_page/content_list/popular_movies.json'
 aaa_host = 'https://sdk-accounts.trueid.net/signin'
+ch_host = 'https://cms-fn-dmpapi.trueid.net/cms-fnshelf/v1/vdd78mEQYEv?fields=channel_code,thumb,channel_info,subscription_package,subscription_tiers,subscriptionoff_requirelogin,drm,is_premium,true_vision,ads_webapp,lang_dual,subtitle,catch_up,allow_catchup,time_shift,allow_timeshift,epg_flag'
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
 
 const axios = require('axios');
+
 const getMovieHit = async () => {
     try {
         return await axios.get (host,{
@@ -58,19 +60,58 @@ const deviceSignin = async () => {
             }
         }).then ( response => {
             if (response.status == 200) {
-                let resHeader = Object.values(response.headers)
-                console.log(resHeader)
-                 //headerObj = response.headers
-                  console.log(response.headers.set-cookie[0])
-               // let resHeaderArr = resHeader.map((resHeader) => resHeader.set-cookie)
-            }
-            
+                  console.log(response.headers['set-cookie'][0])
+            }           
         })
-
     } catch (error){
         console.log('catch error : ', error)
     }
 }
 
-deviceSignin()
+const master = async () =>  {
+    try {
+        return await axios.get( aaa_host,{
+            params: {},
+            headers: {}
+        }).then ( response => {
+
+               })
+    } catch (error) {
+        console.log('catch error : ', error)
+    }
+}
+
+const getAllCh = async () =>  {
+    try {
+        return await axios.get( ch_host,{
+            params: {},
+            headers: {
+                'Authorization':'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+                'Content-Type':'application/json',
+                'User-Agent':'okhttp/3.10.0'
+            }
+        }).then ( response => {
+            if (response.status == 200) {
+                console.log("Result success code =" , response.data.code , " -- " , response.data.data.update_date)
+                console.log("we get",response.data.data.shelf_items.length, "channels")
+                ch_Listing = Object.values(response.data.data.shelf_items)
+                let ch_ID = ch_Listing.map((ch_Listing) => ch_Listing.id)
+                let ch_Title = ch_Listing.map((ch_Listing) => ch_Listing.title)
+                let ch_Code = ch_Listing.map((ch_Listing) => ch_Listing.channel_code)
+                console.log(ch_ID,ch_Title,ch_Code)
+
+
+            } else {
+                console.log("Result error code = " , response.data.code)
+            }
+
+               })
+    } catch (error) {
+        console.log('catch error : ', error)
+    }
+}
+
+
+getAllCh()
+//deviceSignin()
 //getMovieHit()
