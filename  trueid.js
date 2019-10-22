@@ -260,6 +260,42 @@ const getAllCh_loadsh = async () =>  {
 }
 
 
+function getStreamingURL_sync (cms_id,cms_title,app_id,user_uid,host){
+    //var instance = axios.create({baseURL: host})
+    /*
+    instance.get('/list').then(function (response) {
+        console.log('main todo');
+        console.log("response total %s <",response.data.length);
+      }).catch(function (error) {
+        console.log("if error");
+      })    http://zetcode.com/javascript/axios/
+      */
+
+    var parameters = {
+        'id':cms_id,
+        'lang':'',
+        'langid':'th',
+        'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
+        'appid':app_id,
+        'visitor':'mobile',
+        'os':'android',
+        'type':'live',
+        'stremlvl':'auto',
+        'ep_items':'',
+        'uid':user_uid,
+        'access':'login',
+        'stime':'',
+        'duration':''
+    }
+
+    var headers = {
+        'Authorization':'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+        'Content-Type':'application/json',
+        'User-Agent':'okhttp/3.10.0'
+    }
+     axios.get(host,{ params:{parameters},headers:{headers}})
+     //axios.get(URL, { params:{}, headers: { 'Authorization': AuthStr } })
+}
 
 
 getAllCh_loadsh()
