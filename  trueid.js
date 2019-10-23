@@ -1,9 +1,9 @@
-host = 'https://discover.dmpcdn.com/discover/tid_discover_page/content_list/popular_movies.json'
-aaa_host = 'https://sdk-accounts.trueid.net/signin'
-ch_host = 'https://cms-fn-dmpapi.trueid.net/cms-fnshelf/v1/vdd78mEQYEv?fields=channel_code,thumb,channel_info,subscription_package,subscription_tiers,subscriptionoff_requirelogin,drm,is_premium,true_vision,ads_webapp,lang_dual,subtitle,catch_up,allow_catchup,time_shift,allow_timeshift,epg_flag'
-picker_onprem_host = 'https://cms-streamer-dmpapi.trueid.net/pk-streamer/v2/streamer'
-picker_gcp_host = 'https://35.244.252.52/pk-streamer/v2/streamer'
-
+var host = 'https://discover.dmpcdn.com/discover/tid_discover_page/content_list/popular_movies.json'
+var aaa_host = 'https://sdk-accounts.trueid.net/signin'
+var ch_host = 'https://cms-fn-dmpapi.trueid.net/cms-fnshelf/v1/vdd78mEQYEv?fields=channel_code,thumb,channel_info,subscription_package,subscription_tiers,subscriptionoff_requirelogin,drm,is_premium,true_vision,ads_webapp,lang_dual,subtitle,catch_up,allow_catchup,time_shift,allow_timeshift,epg_flag'
+var picker_onprem_host = 'https://cms-streamer-dmpapi.trueid.net/pk-streamer/v2/streamer'
+var picker_gcp_host = 'https://35.244.252.52/pk-streamer/v2/streamer'
+var cms_id_arr 
 var _ = require('loadsh')
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
 
@@ -205,7 +205,7 @@ const getStreamingURL = async (cms_id,cms_title,app_id,user_uid,host) =>  {
 const getAllCh_loadsh = async () =>  {
     try {
         
-        return await axios.get( ch_host,{
+        return  await axios.get( ch_host,{
             params: {},
             headers: {
                 'Authorization':'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
@@ -242,10 +242,19 @@ const getAllCh_loadsh = async () =>  {
                     }
                 })
                 */
+               //cms_id_arr = ch_list.id
+               console.log(ch_list)
+            cms_id_arr = _.pick(ch_list,['id'] )
+            console.log(cms_id_arr)
+              //var onlyCmsID = _.find(ch_list,{id})
+
+
+
                _.forEach(ch_list,function(value){
                 //console.log(value.id,value.title,value.channel_info.channel_name_eng)
                 //getStreamingURL(value.id,value.title,'trueid','12345',picker_onprem_host)
-                getStreamingStatus(value.id,value.title,'trueid','12345',picker_onprem_host)
+                //getStreamingStatus(value.id,value.title,'trueid','12345',picker_onprem_host)
+                //cms_id_arr = value.id
 
             })
 
@@ -260,7 +269,7 @@ const getAllCh_loadsh = async () =>  {
 }
 
 
-function getStreamingURL_sync (cms_id,cms_title,app_id,user_uid,host){
+function evaluteStreamingStatus (cms_id,app_id,user_uid,host){
     //var instance = axios.create({baseURL: host})
     /*
     instance.get('/list').then(function (response) {
@@ -270,8 +279,8 @@ function getStreamingURL_sync (cms_id,cms_title,app_id,user_uid,host){
         console.log("if error");
       })    http://zetcode.com/javascript/axios/
       */
-
-    var parameters = {
+    
+    var params = {
         'id':cms_id,
         'lang':'',
         'langid':'th',
@@ -289,18 +298,53 @@ function getStreamingURL_sync (cms_id,cms_title,app_id,user_uid,host){
     }
 
     var headers = {
-        'Authorization':'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
-        'Content-Type':'application/json',
-        'User-Agent':'okhttp/3.10.0'
+        'Authorization': 'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+        'Content-Type': 'application/json',
+        'User-Agent': 'okhttp/3.10.0'
     }
-     axios.get(host,{ params:{parameters},headers:{headers}})
+     axios.get(host,{params,headers})
+     .then (function(response){
+         console.log(response)
+     })
+     .catch (function (error){
+         console.log(error)
+     })
+     .finally(function(){
+         //always execute
+     })
      //axios.get(URL, { params:{}, headers: { 'Authorization': AuthStr } })
 }
 
+function loopArray(cms_id_arr) {
+    _.forEach(id, id => {
+        console.log(id)
+    })
+}
 
-getAllCh_loadsh()
+async function main(){
+    try{
+        var  result = await getAllCh_loadsh()
+        console.log(cms_id_arr)
+        console.log(_.isObject(cms_id_arr))
+        console.log(_.size(cms_id_arr))
+        _.forEach(cms_id_arr, function(key,value){
+            console.log(key ,value)
+        })
+
+        
+       // console.log(cms_id_arr)
+
+    }catch (error) {
+        console.log(error)
+    }
+}
+
+main()
+
+//console.log("Done")
 //deviceSignin()
 //getMovieHit()
 //getStreamingURL('AlPo3NzNZa62','trueidz','12345',picker_onprem_host)
 
 //console.log(callStreamer('AlPo3NzNZa62',picker_gcp_host))
+//evaluteStreamingStatus('AlPo3NzNZa62','trueid','12345',picker_onprem_host)
