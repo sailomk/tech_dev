@@ -243,9 +243,9 @@ const getAllCh_loadsh = async () =>  {
                 })
                 */
                //cms_id_arr = ch_list.id
-               console.log(ch_list)
-            cms_id_arr = _.pick(ch_list,['id'] )
-            console.log(cms_id_arr)
+                
+                cms_id_arr = ch_list.map((cmdObj) => { return cmdObj.id})
+                //console.log(result)
               //var onlyCmsID = _.find(ch_list,{id})
 
 
@@ -302,9 +302,10 @@ function evaluteStreamingStatus (cms_id,app_id,user_uid,host){
         'Content-Type': 'application/json',
         'User-Agent': 'okhttp/3.10.0'
     }
+
      axios.get(host,{params,headers})
      .then (function(response){
-         console.log(response)
+         console.log(response.data.ext_code)
      })
      .catch (function (error){
          console.log(error)
@@ -315,23 +316,71 @@ function evaluteStreamingStatus (cms_id,app_id,user_uid,host){
      //axios.get(URL, { params:{}, headers: { 'Authorization': AuthStr } })
 }
 
+
+var getStramStatusList
 function loopArray(cms_id_arr) {
     _.forEach(id, id => {
         console.log(id)
     })
 }
 
+async function summaryStreamingStatus (cms_id,app_id,user_uid,host){
+    
+    var params = {
+        'id':cms_id,
+        'lang':'',
+        'langid':'th',
+        'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
+        'appid':app_id,
+        'visitor':'mobile',
+        'os':'android',
+        'type':'live',
+        'stremlvl':'auto',
+        'ep_items':'',
+        'uid':user_uid,
+        'access':'login',
+        'stime':'',
+        'duration':''
+    }
+
+    var headers = {
+        'Authorization': 'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+        'Content-Type': 'application/json',
+        'User-Agent': 'okhttp/3.10.0'
+    }
+    
+     await axios.get(host,{params,headers})
+     .then (function(response){
+         if (response.status == 200 ){
+            getStramStatusList = (cms_id, response.data.ext_code , response.data.ext_msg ,response.data.data.stream.stream_url )
+         }
+         
+     })
+     .catch (function (error){ 
+         console.log(error)
+     })
+     .finally(function(){
+         return "--"
+     })
+     //axios.get(URL, { params:{}, headers: { 'Authorization': AuthStr } })
+}
+
+
 async function main(){
     try{
         var  result = await getAllCh_loadsh()
         console.log(cms_id_arr)
-        console.log(_.isObject(cms_id_arr))
         console.log(_.size(cms_id_arr))
-        _.forEach(cms_id_arr, function(key,value){
-            console.log(key ,value)
+        _.forEach(cms_id_arr, function(value){
+            //console.log(value)
+            var ret =  await summaryStreamingStatus(value,'trueid','12345',picker_onprem_host)
+            //console.log(ret)
+            
+            
+
         })
 
-        
+        await console.log(getStramStatusList)
        // console.log(cms_id_arr)
 
     }catch (error) {
