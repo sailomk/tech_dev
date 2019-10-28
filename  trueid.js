@@ -269,7 +269,7 @@ const getAllCh_loadsh = async () =>  {
 }
 
 
-function evaluteStreamingStatus (cms_id,app_id,user_uid,host){
+async function evaluteStreamingStatus (cms_id,app_id,user_uid,host){
     //var instance = axios.create({baseURL: host})
     /*
     instance.get('/list').then(function (response) {
@@ -317,78 +317,214 @@ function evaluteStreamingStatus (cms_id,app_id,user_uid,host){
 }
 
 
-var getStramStatusList
+let getStramStatusList = []
+
 function loopArray(cms_id_arr) {
     _.forEach(id, id => {
         console.log(id)
     })
 }
 
-async function summaryStreamingStatus (cms_id,app_id,user_uid,host){
-    
-    var params = {
-        'id':cms_id,
-        'lang':'',
-        'langid':'th',
-        'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
-        'appid':app_id,
-        'visitor':'mobile',
-        'os':'android',
-        'type':'live',
-        'stremlvl':'auto',
-        'ep_items':'',
-        'uid':user_uid,
-        'access':'login',
-        'stime':'',
-        'duration':''
-    }
-
-    var headers = {
-        'Authorization': 'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
-        'Content-Type': 'application/json',
-        'User-Agent': 'okhttp/3.10.0'
-    }
-    
-     await axios.get(host,{params,headers})
-     .then (function(response){
-         if (response.status == 200 ){
-            getStramStatusList = (cms_id, response.data.ext_code , response.data.ext_msg ,response.data.data.stream.stream_url )
-         }
-         
-     })
-     .catch (function (error){ 
-         console.log(error)
-     })
-     .finally(function(){
-         return "--"
-     })
-     //axios.get(URL, { params:{}, headers: { 'Authorization': AuthStr } })
+async  function summaryStreamingStatus (cms_id,app_id,user_uid,host){
+    try {
+        var headers = {
+            'Authorization': 'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+            'Content-Type': 'application/json',
+            'User-Agent': 'okhttp/3.10.0'
+        }
+        _.forEach (cms_id,function(value) {
+            var params = {
+                'id':cms_id,
+                'lang':'',
+                'langid':'th',
+                'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
+                'appid':app_id,
+                'visitor':'mobile',
+                'os':'android',
+                'type':'live',
+                'stremlvl':'auto',
+                'ep_items':'',
+                'uid':user_uid,
+                'access':'login',
+                'stime':'',
+                'duration':''
+            }
+            var data =  axios.get(host,{params,headers}).then((response) => {
+            console.log(response.status)
+            })
+        }    
+        )} catch (error) {
+        console.log("error", error)
+        }
 }
 
 
+
+//----------------------------------------------------
+async function pickStreaming(cms_id,app_id,user_uid,host){
+    try {
+
+    
+        const headers = {
+            'Authorization': 'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+            'Content-Type': 'application/json',
+            'User-Agent': 'okhttp/3.10.0'
+        }
+
+        const response =   await axios.get( ch_host,{params: {},headers})
+        await response
+        //console.log
+        
+        if (response.status == 200) {
+            console.log("Result success code =" , response.data.code , " -- " , response.data.data.update_date)
+            console.log("we get",response.data.data.shelf_items.length, "channels")
+            ch_Listing = Object.values(response.data.data.shelf_items)
+            let ch_ID = ch_Listing.map((ch_Listing) => ch_Listing.id)
+            let ch_Title = ch_Listing.map((ch_Listing) => ch_Listing.title)
+            let ch_Code = ch_Listing.map((ch_Listing) => ch_Listing.channel_code)
+           console.log(ch_ID,ch_Title,ch_Code)
+
+           var mainObject = {}
+           var promises = []
+            _.forEach(ch_ID,  function(value){
+                try {
+                    console.log(value)
+                    var params_streamer = {
+                        'id':value,
+                        'lang':'',
+                        'langid':'th',
+                        'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
+                        'appid': 'trueid',
+                        'visitor':'mobile',
+                        'os':'android',
+                        'type':'live',
+                        'stremlvl':'auto',
+                        'ep_items':'',
+                        'uid': '12345',
+                        'access':'login',
+                        'stime':'',
+                        'duration':''
+                    }
+                    promises.push( axios.get( host,{params_streamer,headers}))
+
+                } catch (error) {
+                    console.log("catch error == > ",error)
+                }          
+            })
+
+
+            try {
+                axios.all(promises).then( axios.spread(function (results) {
+                    results.forEach(function(response){
+                      // mainObject[response.identifier] = response.status
+                        console.log(response)
+                    }) 
+                    }))
+            } catch (error) {
+                console.log(error)
+            }
+
+                //console.log(convertToStringValue(mainObject));
+            //await response_picker
+        
+        } else {
+            console.log( "Error response <> 200")
+        } 
+
+
+        
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+//----------------------------------------------------
+
+function sayHello() {
+    return "Hello"
+}
+
+function delaySayHello(){
+    return new Promise((resolve,reject) => {
+        setTimeout(()=> {
+            resolve ("Delay Say Hello")
+        },1000)
+    })
+}
+
+async function longTimeHello(){
+    await setTimeout(()=>{}, 1000); // เพื่อทำการ delay การทำงาน
+    return "Long Time Hello";
+ }
+
+
+
+
+ 
 async function main(){
     try{
-        var  result = await getAllCh_loadsh()
-        console.log(cms_id_arr)
-        console.log(_.size(cms_id_arr))
-        _.forEach(cms_id_arr, function(value){
-            //console.log(value)
-            var ret =  await summaryStreamingStatus(value,'trueid','12345',picker_onprem_host)
-            //console.log(ret)
-            
-            
-
-        })
-
-        await console.log(getStramStatusList)
-       // console.log(cms_id_arr)
+        //var  result = await getAllCh_loadsh()
+        //console.log(cms_id_arr)
+        //console.log(_.size(cms_id_arr))
+        pickStreaming('xx','trueid','12345',picker_onprem_host)
+        
 
     }catch (error) {
         console.log(error)
     }
 }
 
+
+
+function mainPromise_1(){
+    let a = sayHello()
+    let b = delaySayHello()
+    console.log(a)
+    console.log(b)
+}
+
+
+function mainPromise_2(){
+    let a = sayHello()
+    delaySayHello().then((value) => {
+        let b = value
+        console.log(b)
+    })
+    console.log(a)
+}
+
+async function mainPromise_3(){
+    let a = sayHello()
+    let b = await delaySayHello()
+    let c = await longTimeHello()
+    console.log(a)
+    console.log(b)
+    console.log(c)
+    console.log(a)
+    console.log(b)
+    console.log(c)
+    
+}
+
+async function parallelRun(){
+    let a = await Promise.all([delaySayHello(), longTimeHello()]);
+    console.log(a);
+}
+
+
+
+
+
+
+///////////////////////////////////////////////
+
+
 main()
+
+//mainPromise_3()
+//main()
+//parallelRun()
 
 //console.log("Done")
 //deviceSignin()
