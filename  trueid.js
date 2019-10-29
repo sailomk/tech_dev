@@ -531,12 +531,13 @@ async function getURLV2(chID) {
         'duration':''
     }
     
-         axios.get( picker_onprem_host,{params,headers})
+        return await axios.get( picker_onprem_host,{params,headers})
         .then( response => {
-            return (response.data.ext_code,response.data.data.channel_code)
+             var resultSet = response.data.ext_code + ":"+response.data.data.channel_code
+             return  (resultSet)
         })
         .catch(error => {
-            return (error.message)
+            return  (error.message)
         })
     
 }
@@ -595,9 +596,10 @@ const start_10 = async(cmsIdList) => {
         }) 
 
         strRequestBuffer.splice(0,strRequestBuffer.length)      
+        console.log(allResponseData)
     }
 
-    console.log(allResponseData)
+    
 
 }
 
