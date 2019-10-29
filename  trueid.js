@@ -441,6 +441,8 @@ async function pickStreaming(cms_id,app_id,user_uid,host){
 
 //----------------------------------------------------
 
+
+
 function sayHello() {
     return "Hello"
 }
@@ -462,18 +464,7 @@ async function longTimeHello(){
 
 
  
-async function main(){
-    try{
-        //var  result = await getAllCh_loadsh()
-        //console.log(cms_id_arr)
-        //console.log(_.size(cms_id_arr))
-        pickStreaming('xx','trueid','12345',picker_onprem_host)
-        
 
-    }catch (error) {
-        console.log(error)
-    }
-}
 
 
 
@@ -513,10 +504,132 @@ async function parallelRun(){
 }
 
 
+/****************************************************** */
+
+const headers = {
+    'Authorization': 'Bearer 5aaf9ade15afe0324400bacc26115aba3ac9493faf4f27ff957620c2',
+    'Content-Type': 'application/json',
+    'User-Agent': 'okhttp/3.10.0'
+}
+
+//??????????????????????????????????????????????
+async function getURLV2(chID) {
+    var params = {
+        'id':chID,
+        'lang':'',
+        'langid':'th',
+        'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
+        'appid':'trueid',
+        'visitor':'mobile',
+        'os':'android',
+        'type':'live',
+        'stremlvl':'auto',
+        'ep_items':'',
+        'uid':'12345',
+        'access':'login',
+        'stime':'',
+        'duration':''
+    }
+    
+         axios.get( picker_onprem_host,{params,headers})
+        .then( response => {
+            return (response.data.ext_code,response.data.data.channel_code)
+        })
+        .catch(error => {
+            return (error.message)
+        })
+    
+}
+
+//??????????????????????????????????????????????
+const getURL = (chID) => {
+    var params = {
+        'id':chID,
+        'lang':'',
+        'langid':'th',
+        'fields':'setting,allow_chrome_cast,subscriptionoff_requirelogin,subscription_package,subscription_tiers,channel_info,count_views,count_likes,ads,black_out,blackout_start_date,blackout_end_date,blackout_message,mix_no,is_premium,true_vision,teaser_channel,geo_block,time_shift,allow_timeshift,allow_catchup,packages,drm,slug,catchup,allow_catchup,time_shift,allow_timeshift,lang_dual,remove_ads',
+        'appid':'trueid',
+        'visitor':'mobile',
+        'os':'android',
+        'type':'live',
+        'stremlvl':'auto',
+        'ep_items':'',
+        'uid':'12345',
+        'access':'login',
+        'stime':'',
+        'duration':''
+    }
+    return new Promise((resolve,reject) => {
+         axios.get( picker_onprem_host,{params,headers})
+        .then( response => {
+            return resolve(response.data.ext_code,response.data.data.channel_code)
+        })
+        .catch(error => {
+            return reject(error.message)
+        })
+    })
+}
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+const start_10 = async(cmsIdList) => {
+    let strRequests=[]
+    var cmsIdIndex = 0
+    let strRequestBuffer=[]
+    let allResponseData =[]
+    let maxconn = 10
 
 
+    for (let i=0;i < Math.ceil((cmsIdList.length/maxconn)) ;i++){
+        for (let j=0 ; j < maxconn ; j++) {
+            if (cmsIdIndex <= cmsIdList.length-1) {
+                strRequestBuffer.push(await getURLV2(cmsIdList[cmsIdIndex]))
+                //console.log(cmsIdList[cmsIdIndex])
+                //console.log(cmsIdIndex)
+                cmsIdIndex=cmsIdIndex+1
+            } else {
+                console.log('Break with ' , cmsIdIndex)
+                break
+            }       
+        }
+        await Promise.all(strRequestBuffer).then( responseData => {
+            allResponseData.push(responseData)
+        }) 
 
+        strRequestBuffer.splice(0,strRequestBuffer.length)      
+    }
 
+    console.log(allResponseData)
+
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++
+const start = async() => {
+    let strRequests=[]
+    cms_id_arr.forEach(
+        (reqURL) => {
+            //console.log(reqURL)
+            strRequests.push(getURL(reqURL))
+        }
+    )
+    console.log('Done')
+
+    Promise.all(strRequests).then((getURL) => {
+        console.log(getURL)
+    })
+    //console.log(strRequests)
+}
+// -------------------------------------------
+async function main(){
+    try{
+        var  result = await getAllCh_loadsh()
+        //console.log(cms_id_arr)
+        //console.log(_.size(cms_id_arr))
+         start_10(cms_id_arr)
+        
+
+    }catch (error) {
+        console.log(error)
+    }
+}
 ///////////////////////////////////////////////
 
 
