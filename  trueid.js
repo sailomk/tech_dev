@@ -533,7 +533,7 @@ async function getURLV2(chID) {
     
         return await axios.get( picker_onprem_host,{params,headers})
         .then( response => {
-             var resultSet = response.data.ext_code + ":"+response.data.data.channel_code
+             var resultSet = { status_code:response.data.ext_code ,channel_code:response.data.data.channel_code,channel_name:response.data.data.channel_info.channel_name_eng ,drm:response.data.data.drm, geo_check:response.data.data.geo_block, con_check:response.data.data.concurrent,stream_url:response.data.data.stream.stream_url}
              return  (resultSet)
         })
         .catch(error => {
@@ -577,7 +577,7 @@ const start_10 = async(cmsIdList) => {
     let strRequestBuffer=[]
     let allResponseData =[]
     let maxconn = 10
-
+    var arrResData=[]
 
     for (let i=0;i < Math.ceil((cmsIdList.length/maxconn)) ;i++){
         for (let j=0 ; j < maxconn ; j++) {
@@ -595,11 +595,43 @@ const start_10 = async(cmsIdList) => {
             allResponseData.push(responseData)
         }) 
 
-        strRequestBuffer.splice(0,strRequestBuffer.length)      
-        console.log(allResponseData)
+        strRequestBuffer.splice(0,strRequestBuffer.length)    
+        
+
     }
 
-    
+            //merge array to one array
+        
+            _.forEach(allResponseData, val => {
+                //console.log(val)
+                 arrResData = _.concat(arrResData,val)
+            })
+            console.log('Before -> ',arrResData.length)
+            /*
+            _.forEach(arrResData,val => {
+                console.log(val)
+            })
+
+             _.find(arrResData, val => {
+                 if ( val.drm == 'WV_FPS') {
+                  console.log(val.channel_name)
+                 }              
+             })
+             //console.log(JSON.stringify(arrResData))
+            */
+             var drm_wv_fps = _.filter(arrResData, val => {
+                 return val.drm == "WV_FPS"
+             })
+             var drm_aes = _.filter(arrResData, val => {
+                return val.drm == "AES_128"
+            })
+            var drm_none = _.filter(arrResData, val => {
+                return (val.drm != "AES_128" && val.drm != "WV_FPS")
+            })
+            // console.log(JSON.stringify(drm))
+             console.log( 'WV_FPS = ',drm_wv_fps.length)
+             console.log( 'AES_128 = ',drm_aes.length)
+             console.log( 'None define = ',drm_none.length)
 
 }
 
@@ -625,8 +657,41 @@ async function main(){
         var  result = await getAllCh_loadsh()
         //console.log(cms_id_arr)
         //console.log(_.size(cms_id_arr))
+
          start_10(cms_id_arr)
-        
+        var aa = {medicine: 1234, info: "blabla"}
+        var bb = {medicine: 9585, info: "blabla"}
+        var a = ['asd', 'asd', 3]
+        var b = ['asd', 'asd2', 4]
+        var c = _.concat(aa, bb)
+        var fruits= {
+            'apple':    { 'name': 'apple',    'number': 5},
+            'orange': { 'name': 'orange', 'number': 10 }
+          }
+          console.log(JSON.stringify(fruits))
+          var redFruit = Object.entries(fruits).reduce((a,[key, {number}])=> {
+              a[key] = number
+              return a
+          },{}) 
+          //console.log(JSON.stringify(redFruit))
+
+          var t= Object.entries(fruits).map(([key, { number }]) => [key, number])
+         // console.log(JSON.stringify(t))
+
+        dataMed = _.map(c, x => {
+           // console.log('x =', x)
+            return _.assign(x,{
+                medicinex: x.info.toString()
+            })
+        })
+
+        //console.log(dataMed)
+        //var c = _.chunk(['a', 'b', 'c', 'd'], 5)
+       _.forEach(dataMed,v => {
+          // console.log(v)
+       })
+
+
 
     }catch (error) {
         console.log(error)
